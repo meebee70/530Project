@@ -2,17 +2,27 @@ import sys,os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide" #hide pygame welcome message
 import pygame
 
+"""
+Data class for each node
+sprite1 is the non-selected sprite
+sprite2 is the selected sprite
+i,j are the 0-indexed positions in the grid
+rect is the pygame.Rectangle which is the physical location on the screen
+"""
+class Node:
+    def __init__(self,sprite1,sprite2,i,j,x,y,width,height):
+        self.sprite1 = sprite1
+        self.sprite2 = sprite2
+        self.x = i
+        self.y = j
+        self.rect = pygame.Rect(x,y,width,height)
+
+    def collidepoint(self,point):
+        return self.rect.collidepoint(point)
+
+
 WIDTH,HEIGHT = 800,600
 MAX_STRENGTH = 480 # width/length of meter bar
-
-pygame.init()
-
-# global variables for configuring window/page state
-screen_width,screen_height = WIDTH,HEIGHT
-screen = pygame.display.set_mode((screen_width,screen_height))
-pygame.display.set_caption("grid lock test")
-
-font = pygame.font.SysFont("britannic", 20)
 
 
 # Reverse the calculation on the coords to get the orig i and j vals of each node
@@ -30,7 +40,7 @@ def get_ij(given_list,x,y):
 
 ################################################################################
 ############ IMPLEMENT THIS ####################################################
-def calculate_strength(coords_list,x,y,meter):
+def calculate_strength(node_list,x,y,meter):
     node_values = list()
     # ALL METERS must have a max value to calc a percentage of effectiveness to scale the meter display 
     max_instance = 0
@@ -42,15 +52,15 @@ def calculate_strength(coords_list,x,y,meter):
     if meter == "song":
         max_instance = 2*(x*y)
         #print((len(coords_list)/max_instance)*MAX_STRENGTH)
-        if (len(coords_list)/max_instance) >= 1:
+        if (len(node_list)/max_instance) >= 1:
             return MAX_STRENGTH
-        return (len(coords_list)/max_instance)*MAX_STRENGTH
+        return (len(node_list)/max_instance)*MAX_STRENGTH
 
     # SUN METER
     if meter == "sun":
         summation = 0
-        for i in range(len(coords_list)):
-            value = coords_list[i][0]
+        for i in range(len(node_list)):
+            value = node_list[i].x
             if i%x == 0:
                 value -= i
             max_instance += i
@@ -76,7 +86,7 @@ def calculate_strength(coords_list,x,y,meter):
 
 ##############################################################################
 
-def create_rects(nodes,x,y):
+def create_nodes(nodes,x,y):
     x_step,y_step = WIDTH/(2*x + 1),((HEIGHT-60) * 0.8)/(2*y + 1)
 
     #load images
@@ -87,14 +97,14 @@ def create_rects(nodes,x,y):
     
     for i in range(1,x*2,2):
         for j in range(1,y*2,2):
-            nodes.append((icon,icon2,pygame.Rect(x_step*i,y_step*j,x_step,y_step)))
+            nodes.append(Node(icon,icon2,(i-1)/2,(j-1)/2,x_step*i,y_step*j,x_step,y_step))
 
 def draw_nodes(screen,nodes,selected_nodes):
     screen.fill((0,0,0))
     for node in nodes:
-        screen.blit(node[0],node[2])
+        screen.blit(node.sprite1,node.rect)
     for node in selected_nodes:
-        screen.blit(node[1],node[2]) #overdraw selected nodes
+        screen.blit(node.sprite2,node.rect) #overdraw selected nodes
 
 # Draw the meters and labels
 def fill_meters(screen,song,sun,andr,heidt,exp):
@@ -148,18 +158,17 @@ def draw_lines(screen,nodes,start, width=5,color=(125,125,125)):
         return
     last_pos = start
     for node in nodes:
-        pygame.draw.line(screen,color,last_pos,node[2].center,width = width)
-        last_pos = node[2].center
+        pygame.draw.line(screen,color,last_pos,node.rect.center,width = width)
+        last_pos = node.rect.center
         color = ((color[0]+3) % 255,(color[1]+5) % 255,(color[2]+7) % 255)
     pygame.draw.line(screen,color,last_pos,pygame.mouse.get_pos(),width=width)
 
 
 def main(x,y):
-    rects = list()
+    nodes = list()
     selected_nodes = list()
-    pattern_values = list()
 
-    create_rects(rects,x,y)
+    create_nodes(nodes,x,y)
 
     m_song = 0
     m_sun = 0
@@ -180,24 +189,19 @@ def main(x,y):
                 mouse_down = True
                 pattern_created = False
                 coords = pygame.mouse.get_pos()
-                #print('event',coords)
             if event.type == pygame.MOUSEBUTTONUP and mouse_down and not pattern_created:
                 mouse_down = False
                 pattern_created = True
-                #print('event2', selected_nodes)
                 selected_nodes = list()
             if event.type == pygame.MOUSEBUTTONDOWN and pattern_created:
                 mouse_down = False
                 pattern_created = False
-                pattern_values = list()
                 #print("refresh")
-        
-        value_list = get_ij(pattern_values,x,y)
 
         # Calculate pattern strength
         ########### IMPLEMENT THESE #############
-        m_song = calculate_strength(value_list,x,y,"song")
-        m_sun = calculate_strength(value_list,x,y,"sun")
+        m_song = calculate_strength(selected_nodes,x,y,"song")
+        m_sun = calculate_strength(selected_nodes,x,y,"sun")
         #m_andr = calculate_strength(value_list,x,y,"andr")
         #m_heidt = calculate_strength(value_list,x,y,"heidt")
         #m_exp = calculate_strength(value_list,x,y,"exp")
@@ -205,21 +209,19 @@ def main(x,y):
         
         if mouse_down:
             temp = False
-            for rect in rects:
-                if rect[2].collidepoint(pygame.mouse.get_pos()):
+            for node in nodes:
+                if node.collidepoint(pygame.mouse.get_pos()):
                     temp = True
                     if not hover:
-                        if len(selected_nodes) > 0 and rect is selected_nodes[-1]:
+                        if len(selected_nodes) > 0 and node is selected_nodes[-1]:
                             selected_nodes.pop()
                         else:
-                            selected_nodes.append(rect)
-                            pattern_values.append(pygame.mouse.get_pos())
-                            print(pattern_values)
+                            selected_nodes.append(node)
                     break   #can only collide with one rect
             hover = temp
 
         if not pattern_created:            
-            draw_nodes(screen,rects,selected_nodes)
+            draw_nodes(screen,nodes,selected_nodes)
             fill_meters(screen,m_song,m_sun,m_andr,m_heidt,m_exp)
             if mouse_down:
                 draw_lines(screen,selected_nodes,coords)
@@ -237,6 +239,15 @@ if __name__ == "__main__":
         print(sys.argv[1],sys.argv[2])
         x = int(sys.argv[1])
         y = int(sys.argv[2])
+
+        pygame.init()
+        # global variables for configuring window/page state
+        screen_width,screen_height = WIDTH,HEIGHT
+        screen = pygame.display.set_mode((screen_width,screen_height))
+        pygame.display.set_caption("grid lock test")
+
+        font = pygame.font.SysFont("britannic", 20)
+        
         main(x,y)
     else:
         print("please ensure both arguments are integers")
