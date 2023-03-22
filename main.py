@@ -10,7 +10,6 @@ i,j are the 0-indexed positions in the grid
 rect is the pygame.Rectangle which is the physical location on the screen
 """
 class Node:
-
     def __init__(self,sprite1,sprite2,i,j,x,y,width,height):
         self.sprite1 = sprite1
         self.sprite2 = sprite2
@@ -24,15 +23,6 @@ class Node:
 
 WIDTH,HEIGHT = 800,600
 MAX_STRENGTH = 480 # width/length of meter bar
-
-pygame.init()
-
-# global variables for configuring window/page state
-screen_width,screen_height = WIDTH,HEIGHT
-screen = pygame.display.set_mode((screen_width,screen_height))
-pygame.display.set_caption("grid lock test")
-
-font = pygame.font.SysFont("britannic", 20)
 
 
 # Reverse the calculation on the coords to get the orig i and j vals of each node
@@ -199,18 +189,14 @@ def main(x,y):
                 mouse_down = True
                 pattern_created = False
                 coords = pygame.mouse.get_pos()
-                #print('event',coords)
             if event.type == pygame.MOUSEBUTTONUP and mouse_down and not pattern_created:
                 mouse_down = False
                 pattern_created = True
-                #print('event2', selected_nodes)
                 selected_nodes = list()
             if event.type == pygame.MOUSEBUTTONDOWN and pattern_created:
                 mouse_down = False
                 pattern_created = False
                 #print("refresh")
-        
-        #value_list = get_ij(pattern_values,x,y)
 
         # Calculate pattern strength
         ########### IMPLEMENT THESE #############
@@ -253,6 +239,15 @@ if __name__ == "__main__":
         print(sys.argv[1],sys.argv[2])
         x = int(sys.argv[1])
         y = int(sys.argv[2])
+
+        pygame.init()
+        # global variables for configuring window/page state
+        screen_width,screen_height = WIDTH,HEIGHT
+        screen = pygame.display.set_mode((screen_width,screen_height))
+        pygame.display.set_caption("grid lock test")
+
+        font = pygame.font.SysFont("britannic", 20)
+        
         main(x,y)
     else:
         print("please ensure both arguments are integers")
