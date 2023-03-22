@@ -50,7 +50,7 @@ def get_ij(given_list,x,y):
 
 ################################################################################
 ############ IMPLEMENT THIS ####################################################
-def calculate_strength(coords_list,x,y,meter):
+def calculate_strength(node_list,x,y,meter):
     node_values = list()
     # ALL METERS must have a max value to calc a percentage of effectiveness to scale the meter display 
     max_instance = 0
@@ -62,15 +62,15 @@ def calculate_strength(coords_list,x,y,meter):
     if meter == "song":
         max_instance = 2*(x*y)
         #print((len(coords_list)/max_instance)*MAX_STRENGTH)
-        if (len(coords_list)/max_instance) >= 1:
+        if (len(node_list)/max_instance) >= 1:
             return MAX_STRENGTH
-        return (len(coords_list)/max_instance)*MAX_STRENGTH
+        return (len(node_list)/max_instance)*MAX_STRENGTH
 
     # SUN METER
     if meter == "sun":
         summation = 0
-        for i in range(len(coords_list)):
-            value = coords_list[i][0]
+        for i in range(len(node_list)):
+            value = node_list[i].x
             if i%x == 0:
                 value -= i
             max_instance += i
@@ -177,7 +177,6 @@ def draw_lines(screen,nodes,start, width=5,color=(125,125,125)):
 def main(x,y):
     nodes = list()
     selected_nodes = list()
-    pattern_values = list()
 
     create_nodes(nodes,x,y)
 
@@ -209,15 +208,14 @@ def main(x,y):
             if event.type == pygame.MOUSEBUTTONDOWN and pattern_created:
                 mouse_down = False
                 pattern_created = False
-                pattern_values = list()
                 #print("refresh")
         
-        value_list = get_ij(pattern_values,x,y)
+        #value_list = get_ij(pattern_values,x,y)
 
         # Calculate pattern strength
         ########### IMPLEMENT THESE #############
-        m_song = calculate_strength(value_list,x,y,"song")
-        m_sun = calculate_strength(value_list,x,y,"sun")
+        m_song = calculate_strength(selected_nodes,x,y,"song")
+        m_sun = calculate_strength(selected_nodes,x,y,"sun")
         #m_andr = calculate_strength(value_list,x,y,"andr")
         #m_heidt = calculate_strength(value_list,x,y,"heidt")
         #m_exp = calculate_strength(value_list,x,y,"exp")
@@ -233,8 +231,6 @@ def main(x,y):
                             selected_nodes.pop()
                         else:
                             selected_nodes.append(node)
-                            pattern_values.append(pygame.mouse.get_pos())
-                            print(pattern_values)
                     break   #can only collide with one rect
             hover = temp
 
