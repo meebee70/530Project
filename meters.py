@@ -22,11 +22,27 @@ def get_kmoves(nodes):
     moves = 0.0
     for i in range(nodes.len() - 1):
         vec = (nodes[i][0] - nodes[i+1][0], nodes[i][1] - nodes[i+1][1]) #stinky
-        dist += math.sqrt(vec[0]*vec[0] + vec[1]*vec[1])
+        dist = math.abs(vec[0]) + math.abs(vec[1]) - 2
+        if dist > 2:
+            moves += math.log(dist - 1, 2)
+            #returns 1 when it's a normal knight move,
+            #and anything bigger has diminishing returns
     return moves
 
 def get_nadj(nodes):
-    return 0.0
+    nonadj = 0
+    for i in range(2, nodes.len()):
+        px, py = nodes[i]
+        vx = nodes[i+1][0] - px
+        vy = nodes[i+1][1] - py
+        for j in range(i):
+            dx = nodes[j][0] - px
+            dy = nodes[j][1] - py
+            if (vy * dx == vx * dy):
+                d = dx/vx
+                if (d > 0. and d < 1.):
+                    nonadj += 1
+    return nonadj
     
 def get_turns(nodes):
     turns = 0.0
