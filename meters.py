@@ -21,7 +21,13 @@ def get_crosses(nodes):
 def get_kmoves(nodes):
     moves = 0.0
     for i in range(nodes.len() - 1):
-        vec = (nodes[i][0] - nodes[i+1][0], nodes[i][1] - nodes[i+1][1]) #stinky
+        x = nodes[i][0] - nodes[i+1][0]
+        y = nodes[i][1] - nodes[i+1][1]
+        #we want to consider the shortest possible path with the same angle
+        d = gcd(x, y)
+        x = x/d
+        y = y/d
+
         dist = math.abs(vec[0]) + math.abs(vec[1]) - 2
         if dist > 2:
             moves += math.log(dist - 1, 2)
@@ -38,7 +44,9 @@ def get_nadj(nodes):
         for j in range(i):
             dx = nodes[j][0] - px
             dy = nodes[j][1] - py
-            if (vy * dx == vx * dy):
+            vx1 = nodes[j][0] - nodes[j+1][0]
+            vy1 = nodes[j][1] - nodes[j+1][1]
+            if (vy * dx == vx * dy and vx*vy1 - vx1*vy == 0):
                 d = dx/vx
                 if (d > 0. and d < 1.):
                     nonadj += 1
