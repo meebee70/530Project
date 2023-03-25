@@ -108,6 +108,55 @@ def andriotis(nodes, height, width):
     a = get_adj(nodes)
     return s + l + t + k + a
 
-#markov chains
+#How many guesses to determine pattern starts at this position (roughly)
+#cases where dimension < 3 not yet covered
+def start_guesses(nodes,width,height):
+    #data pulled from aviv p.306
+    mat3 = {{1,3,4},{7,5,9},{2,8,6}} #[y][x]
+    mat4 = {{1,4,9,3},{6,5,11.5,13},{8,10,15.5,14},{2,11.5,15.5,7}} #[y][x]
+
+    #for matrices of odd shapes, determine if they are odd or even in size
+    #then check which data column they fit most nicely into
+    #not perfect, but its the data we have
+    if height %2 == 0:
+        marky = height//4
+        y = mat4[nodes[0][0]//marky]
+    else:
+        marky = height//3
+        y = mat3[nodes[0][0]//marky]
+    if width % 2 == 0:
+        markx = width//4
+    else:
+        markx = width//3
+    return y[width//markx]/(markx * marky)
+
+    
+
+#assuming we know two consecutive nodes, how many guesses would it take to find the third?
+def heidt_helper(nodes,height,width):
+    last_node = nodes[0]
+    cur_node = nodes[1]
+
+    tot = start_guesses(nodes,width,height)
+
+    for node in nodes[2:]:
+
+        
+
+        last_node = cur_node
+        cur_node = node
+
+#The hackiest markov chain you've ever seen
+#returns a value between 0 and 1, with 0 being weak, and 1 being strong
+#nodes must be at least length 3 to work
 def heidt(nodes, height, width):
-    return 0
+    if len(nodes < 3):
+        return 0
+    return min(heidt_helper(nodes,height,width)/pow(width*height-1,len(nodes)),1)
+
+
+
+
+
+
+
