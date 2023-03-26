@@ -83,7 +83,45 @@ def get_maxd(nodes):
 
 #This one might be hard
 def get_nonrep(nodes):
-    return 0.0
+    vs = []
+    ls = []
+    ts = []
+    found = False
+    maxlen = 1
+    
+    for i in range(nodes.len() - 1):
+        vs.append((nodes[i+1][0] - nodes[i][0], nodes[i+1][1] - nodes[i][1]))
+        ls.append(vs[i][0]*vs[i][0] + vs[i][1]*vs[i][1])
+        if i > 0:
+            ts.append(vs[i][0]*vs[i+1][0] + vs[i][1]*vs[i+1][1])
+
+    #check palindromes centered on nodes (length is even number)
+    for i in range(1, ts.len()):
+        if ls[i] != ls[i+1]: #base case: lengths of adjacent vecs are not equal, so not a palindrome
+            continue
+        length = 1
+        while (i - length > 0 and i + length < ts.len() - 1):
+            if (ts[i-length] != ts[i+length] or
+                ls[i - length] != ls[i + length + 1]):
+                break
+            if (length > maxlen):
+                maxlen = length
+                found = True
+
+    #check palindromes centered on segments (length is odd)
+    for i in range(2, ls.len()):
+        if ls[i-1] != ls[i+1] or ts[i-1] != ts[i]: #base case: lengths of adjacent vecs are not equal, so not a palindrome
+            continue
+        length = 1
+        while (i - length > 0 and i + length < ts.len() - 1):
+            if (ts[i- length - 1] != ts[i+length] or
+                ls[i - length - 1] != ls[i + length + 1]):
+                break
+            if (length + 1 > maxlen):
+                maxlen = length + 1
+                found = True
+             
+    return ((nodes.len() - maxlen)/nodes.len()) if found else 0.0
 
 #need to find a way to calculate the maximum maxd value
 def song(nodes, height, width):
@@ -101,7 +139,7 @@ def sun(nodes, height, width):
     return l*math.log(e + c + a, 2)
 
 def andriotis(nodes, height, width):
-    s = nodes[0] == (0,0) ? 0 : 1
+    s = 0 if nodes[0] == (0,0) else 1
     l = nodes.len()
     t = get_turns(nodes)
     k = get_kmoves(nodes)
