@@ -88,7 +88,7 @@ def create_rects(nodes,x,y):
     
     for i in range(1,x*2,2):
         for j in range(1,y*2,2):
-            nodes.append((icon,icon2,pygame.Rect(x_step*i,y_step*j,x_step,y_step)))
+            nodes.append((icon,icon2,pygame.Rect(x_step*i,y_step*j,x_step,y_step),(i-1)//2,(j-1)//2))
 
 def draw_nodes(screen,nodes,selected_nodes):
     screen.fill((0,0,0))
@@ -158,7 +158,6 @@ def draw_lines(screen,nodes,start, width=5,color=(125,125,125)):
 def main(x,y):
     rects = list()
     selected_nodes = list()
-    pattern_values = list()
 
     create_rects(rects,x,y)
 
@@ -190,10 +189,7 @@ def main(x,y):
             if event.type == pygame.MOUSEBUTTONDOWN and pattern_created:
                 mouse_down = False
                 pattern_created = False
-                pattern_values = list()
                 #print("refresh")
-        
-        value_list = get_ij(pattern_values,x,y)
 
         # Moved these calculations to occur after the pattern changes, instead of every iteration of the loop
         # Calculate pattern strength
@@ -223,10 +219,14 @@ def main(x,y):
                                     if rects[i][2].clipline(last,rect[2].center) and rects[i][2] not in selected_nodes:
                                         selected_nodes.append(rects[i])
                                 selected_nodes.append(rect)
-                                pattern_values.append(pygame.mouse.get_pos())
-                                m_song = 480*meters.song(value_list,x,y)
-                                m_sun = meters.sun(value_list,x,y)
-                                m_andr = meters.andriotis(value_list,x,y)
+
+                    if len(selected_nodes) > 1:
+                        value_list = list()
+                        for node in selected_nodes:
+                            value_list.append((node[3],node[4]))
+                        m_song = 480*meters.song(value_list,x,y)
+                        m_sun = meters.sun(value_list,x,y)
+                        m_andr = meters.andriotis(value_list,x,y)
                     break   #can only collide with one rect
             hover = temp
 
