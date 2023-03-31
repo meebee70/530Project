@@ -154,6 +154,11 @@ def draw_lines(screen,nodes,start, width=5,color=(125,125,125)):
         color = ((color[0]+3) % 255,(color[1]+5) % 255,(color[2]+7) % 255)
     pygame.draw.line(screen,color,last_pos,pygame.mouse.get_pos(),width=width)
 
+def height_pos(node):
+    return node[2].center[1]
+
+def horizontal_pos(node):
+    return node[2].center[0]
 
 def main(x,y):
     rects = list()
@@ -215,15 +220,25 @@ def main(x,y):
                         else:
                             if not rect in selected_nodes:
                                 last = selected_nodes[-1][2].center if len(selected_nodes) > 0 else coords
+                                temp= list()
                                 for i in range(len(rects)):
-                                    if rects[i][2].clipline(last,rect[2].center) and rects[i][2] not in selected_nodes:
-                                        selected_nodes.append(rects[i])
-                                selected_nodes.append(rect)
+                                    if rects[i][2].clipline(last,rect[2].center) and rects[i] not in selected_nodes:
+                                        temp.append(rects[i])
+
+                                if len(temp)>0:
+                                    print("temp",temp)
+                                    vert_reverse = True if last[1] > height_pos(rect) else False
+                                    hori_reverse = True if last[0] > horizontal_pos(rect) else False
+                                    temp.sort(reverse = vert_reverse,key=height_pos)
+                                    temp.sort(reverse=hori_reverse,key=horizontal_pos)
+                                    for node in temp:
+                                        selected_nodes.append(node)
 
                     if len(selected_nodes) > 1:
                         value_list = list()
                         for node in selected_nodes:
                             value_list.append((node[3],node[4]))
+                        print(value_list)
                         m_song = 480*meters.song(value_list,x,y)
                         m_sun = meters.sun(value_list,x,y)
                         m_andr = meters.andriotis(value_list,x,y)
