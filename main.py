@@ -217,12 +217,16 @@ def main(x,y):
                             m_sun = meters.sun(value_list,x,y)
                             m_andr = meters.andriotis(value_list,x,y)
                         else:
-                            selected_nodes.append(rect)
-                            pattern_values.append(pygame.mouse.get_pos())
-                            #print(pattern_values)
-                            m_song = 480*meters.song(value_list,x,y)
-                            m_sun = meters.sun(value_list,x,y)
-                            m_andr = meters.andriotis(value_list,x,y)
+                            if not rect in selected_nodes:
+                                last = selected_nodes[-1][2].center if len(selected_nodes) > 0 else coords
+                                for i in range(len(rects)):
+                                    if rects[i][2].clipline(last,rect[2].center) and rects[i][2] not in selected_nodes:
+                                        selected_nodes.append(rects[i])
+                                selected_nodes.append(rect)
+                                pattern_values.append(pygame.mouse.get_pos())
+                                m_song = 480*meters.song(value_list,x,y)
+                                m_sun = meters.sun(value_list,x,y)
+                                m_andr = meters.andriotis(value_list,x,y)
                     break   #can only collide with one rect
             hover = temp
 
