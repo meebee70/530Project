@@ -217,6 +217,7 @@ def main(x,y):
                             m_song = 480*meters.song(value_list,x,y)
                             m_sun = meters.sun(value_list,x,y)
                             m_andr = meters.andriotis(value_list,x,y)
+                            
                         else:
                             if not rect in selected_nodes:
                                 last = selected_nodes[-1][2].center if len(selected_nodes) > 0 else coords
@@ -238,10 +239,16 @@ def main(x,y):
                         value_list = list()
                         for node in selected_nodes:
                             value_list.append((node[3],node[4]))
-                        print(value_list)
-                        m_song = 480*meters.song(value_list,x,y)
-                        m_sun = meters.sun(value_list,x,y)
-                        m_andr = meters.andriotis(value_list,x,y)
+                        print("value list", value_list)
+                        #according to the current statistical ranges we have from 3x3 grids we cap the possible values at 1
+                        #anything over 1 is sufficently strong
+                        m_song = 480* min(meters.song(value_list,x,y), 1)
+                        #46.807-6.24 is the value for a 3x3 grid, more statistical analysis needs to be done to determine NxM scaling 
+                        m_sun = 480* min((meters.sun(value_list,x,y) / (46.807-6.24)), 1)
+                        #the encapsulating min is to prevent overflows, any value over is to be considered sufficiently strong
+                        m_andr = min(480, (480/max(x, y)) * (meters.andriotis(value_list,x,y) / max(x, y)))
+                        p_andr = meters.andriotis(value_list,x,y)
+                        print(m_song / 480, ",", (m_sun / 480) * (46.807-6.24), ",", p_andr)
                     break   #can only collide with one rect
             hover = temp
 
