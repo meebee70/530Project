@@ -140,9 +140,7 @@ def sun(nodes, height, width):
     e = get_eucl(nodes)
     c = get_crosses(nodes)
     a = get_nadj(nodes)
-    print(e)
-    print(c)
-    print(a)
+    
     return l*math.log(e + c + a, 2)
 
 def andriotis(nodes, height, width):
